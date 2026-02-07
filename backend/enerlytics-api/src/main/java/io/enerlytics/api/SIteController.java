@@ -6,17 +6,15 @@ import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
 @RestController
 public class SIteController {
 
     @GetMapping("api/sites")
     public List<Map<String, Object>> sites() {
         return List.of(
-            Map.of("id", 1, "name" , "Solar Planet Alpha", "status", "OK"),
-            Map.of("id", 2, "name", "Wind Farm Beta", "status", "warning")
+                Map.of("id", 1, "name", "Solar Planet Alpha", "status", "OK"),
+                Map.of("id", 2, "name", "Wind Farm Beta", "status", "warning")
         );
     }
-    
-    
+
 }
