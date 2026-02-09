@@ -1,0 +1,28 @@
+@host = http://localhost:8080
+@sites = {{host}}/api/sites
+
+GET {{sites}}
+
+###
+GET {{sites}}/2
+
+###
+POST {{sites}}
+Content-Type: application/json
+
+{
+    "name": "Battery Storage Charlie",
+    "status": "Critical"
+}
+
+###
+PUT {{sites}}/2
+Content-Type: application/json
+
+{
+    "name": "Battery Storage Charlie",
+    "status": "OK"
+}
+
+###
+DELETE {{sites}}/3
