@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class SIteController {
+public class SiteController {
 
     @GetMapping("api/sites")
     public List<Map<String, Object>> sites() {
