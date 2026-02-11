@@ -18,7 +18,7 @@ function App() {
 
   return (
     <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      <h1>Enerlytics Dashboard</h1>
+      <h1 className="">Enerlytics Dashboard</h1>
 
       {sites.length === 0 ? (
         <p>Loading sites...</p>
