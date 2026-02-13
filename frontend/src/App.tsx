@@ -33,6 +33,14 @@ function App() {
     setSiteStatus('');
   };
 
+  const handleDelete = async (id: number) => {
+    try {
+      await axios.delete(`/api/sites/${id}`)
+      setSites(prev => prev.filter(site => site.id !== id))
+    } catch (err) {
+      console.log(err)
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -81,6 +89,13 @@ function App() {
               }}
             >
               <strong>{site.name}</strong> — {site.status}
+              <button
+                onClick={() => handleDelete(site.id)}
+                className="ml-6 text-xs px-2 py-1 border border-gray-300 rounded-md text-gray-500 hover:border-red-500 hover:text-red-600 transition"
+              >
+                Delete
+              </button>
+
             </li>
           ))}
         </ul>
