@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import SiteForm from './components/SiteForm';
 import { siteSchema } from './schemas/SiteSchema';
+import axios from 'axios';
 
 type Site = {
   id: number;
   name: string;
   status: string;
 };
+
 
 function App() {
   const [sites, setSites] = useState<Site[]>([]);
@@ -31,12 +33,18 @@ function App() {
     setSiteStatus('');
   };
 
+
   useEffect(() => {
-    fetch('/api/sites')
-      .then((res) => res.json())
-      .then((data) => setSites(data))
-      .catch((err) => console.error('API error:', err));
-  }, []);
+    const fetchData = async () => {
+      try {
+        const res = await axios.get<Site[]>('/api/sites')
+        setSites(res.data)
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    fetchData()
+  }, [])
 
   return (
     <div
