@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import SiteForm from './components/SiteForm'
 import { siteSchema } from './schemas/SiteSchema'
-import axios from 'axios'
+import { getAll, remove, update, create } from './services/sites'
 
 type Site = {
   id: number
@@ -30,45 +30,40 @@ function App() {
     }
 
     try {
-      const res = await axios.post('/api/sites', newSite)
-      const created = res.data as Site
-
-      setSites((prev) => [...prev, created])
+      const created = await create(newSite)
+      setSites(prev => [...prev, created])
       setSiteName('')
       setSiteStatus('')
     } catch (err) {
       console.error('Failed to create site:', err)
     }
   }
-
-
-  const handleUpdate = async (
-    id: number,
-    updatedSite: { name: string; status: string }
-  ): Promise<Site> => {
-    const res = await axios.put(`/api/sites/${id}`, updatedSite)
-
-    console.log('PUT response.data', res.data)
-    const updated = res.data as Site
-
-    setSites((prev) => prev.map((s) => (s.id === id ? updated : s)))
-    return updated
-  }
-
   const handleDelete = async (id: number) => {
     try {
-      await axios.delete(`/api/sites/${id}`)
+      await remove(id)
       setSites((prev) => prev.filter((site) => site.id !== id))
     } catch (err) {
       console.log(err)
     }
   }
 
+  const handleUpdate = async (
+    id: number,
+    updatedSite: { name: string; status: string }
+  ): Promise<Site> => {
+
+    const updated = await update(id, updatedSite)
+
+    setSites((prev) => prev.map((s) => (s.id === id ? updated : s)))
+    return updated
+  }
+
   useEffect(() => {
+
     const fetchData = async () => {
       try {
-        const res = await axios.get<Site[]>('/api/sites')
-        setSites(res.data)
+        const data = await getAll()
+        setSites(data)
       } catch (err) {
         console.error(err)
       }
@@ -95,6 +90,7 @@ function App() {
         setSiteStatus={setSiteStatus}
         handleAddSite={handleAddSite}
       />
+
 
       {sites.length === 0 ? (
         <p>Loading sites...</p>
