@@ -1,191 +1,103 @@
-import { useEffect, useState } from 'react'
-import SiteForm from './components/SiteForm'
-import { siteSchema } from './schemas/SiteSchema'
-import { getAll, remove, update, create } from './services/sites'
+import { useEffect, useState } from 'react';
+import PowerStationForm from './components/PowerStationForm';
+import { powerStationSchema } from './schemas/PowerStationSchema';
+import { getAll, remove, update, create } from './services/powerStations';
+import PowerStationList from './components/PowerStationsList';
 
-type Site = {
-  id: number
-  name: string
-  status: string
-}
+type PowerStation = {
+  id: number;
+  name: string;
+  status: string;
+};
 
 function App() {
-  const [sites, setSites] = useState<Site[]>([])
-  const [siteName, setSiteName] = useState('')
-  const [siteStatus, setSiteStatus] = useState('')
+  const [powerStations, setPowerStations] = useState<PowerStation[]>([]);
+  const [powerStationName, setPowerStationName] = useState('');
+  const [powerStationStatus, setPowerStationStatus] = useState('');
 
-  const [editingId, setEditingId] = useState<number | null>(null)
-  const [editName, setEditName] = useState('')
-  const [editStatus, setEditStatus] = useState('')
+  const handleAddPowerStation = async (event: React.SyntheticEvent) => {
+    event.preventDefault();
 
-  const handleAddSite = async (event: React.SyntheticEvent) => {
-    event.preventDefault()
+    const newPowerStation = {
+      name: powerStationName,
+      status: powerStationStatus,
+    };
 
-    const newSite = { name: siteName, status: siteStatus }
-
-    const results = siteSchema.safeParse({ id: 1, ...newSite })
+    const results = powerStationSchema.safeParse({ id: 1, ...newPowerStation });
     if (!results.success) {
-      alert(results.error.issues.map((e) => e.message).join('\n'))
-      return
+      alert(results.error.issues.map((e) => e.message).join('\n'));
+      return;
     }
 
     try {
-      const created = await create(newSite)
-      setSites(prev => [...prev, created])
-      setSiteName('')
-      setSiteStatus('')
+      const created = await create(newPowerStation);
+      setPowerStations((prev) => [...prev, created]);
+      setPowerStationName('');
+      setPowerStationStatus('');
     } catch (err) {
-      console.error('Failed to create site:', err)
+      console.error('Failed to create powerStation:', err);
     }
-  }
+  };
   const handleDelete = async (id: number) => {
     try {
-      await remove(id)
-      setSites((prev) => prev.filter((site) => site.id !== id))
+      await remove(id);
+      setPowerStations((prev) =>
+        prev.filter((powerStation) => powerStation.id !== id),
+      );
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
-  }
+  };
 
   const handleUpdate = async (
     id: number,
-    updatedSite: { name: string; status: string }
-  ): Promise<Site> => {
+    updatedPowerStation: { name: string; status: string },
+  ): Promise<PowerStation> => {
+    const updated = await update(id, updatedPowerStation);
 
-    const updated = await update(id, updatedSite)
-
-    setSites((prev) => prev.map((s) => (s.id === id ? updated : s)))
-    return updated
-  }
+    setPowerStations((prev) => prev.map((s) => (s.id === id ? updated : s)));
+    return updated;
+  };
 
   useEffect(() => {
-
     const fetchData = async () => {
       try {
-        const data = await getAll()
-        setSites(data)
+        const data = await getAll();
+        setPowerStations(data);
       } catch (err) {
-        console.error(err)
+        console.error(err);
       }
-    }
-    fetchData()
-  }, [])
+    };
+    fetchData();
+  }, []);
 
   return (
+
     <div
+
       style={{
         padding: '2rem',
         fontFamily: 'sans-serif',
         backgroundColor: 'white',
         minHeight: '100vh',
         color: 'black',
-      }}
-    >
-      <h1 style={{ marginBottom: '1.5rem' }}>Enerlytics Dashboard</h1>
-
-      <SiteForm
-        siteName={siteName}
-        setSiteName={setSiteName}
-        siteStatus={siteStatus}
-        setSiteStatus={setSiteStatus}
-        handleAddSite={handleAddSite}
+      }}>
+      <PowerStationForm
+        powerStationName={powerStationName}
+        setPowerStationName={setPowerStationName}
+        powerStationStatus={powerStationStatus}
+        setPowerStationStatus={setPowerStationStatus}
+        handleAddPowerStation={handleAddPowerStation}
+      />
+      <PowerStationList
+        handleDelete={handleDelete}
+        handleUpdate={handleUpdate}
+        powerStations={powerStations}
       />
 
 
-      {sites.length === 0 ? (
-        <p>Loading sites...</p>
-      ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {sites.map((site) => (
-            <li
-              key={site.id}
-              style={{
-                padding: '0.75rem',
-                border: '1px solid #ddd',
-                borderRadius: '6px',
-                marginBottom: '0.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '1rem',
-              }}
-            >
-              {editingId === site.id ? (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    flex: 1,
-                  }}
-                >
-                  <input
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    className="border border-gray-300 rounded px-3 py-2 text-sm w-full"
-                  />
-
-                  <input
-                    value={editStatus}
-                    onChange={(e) => setEditStatus(e.target.value)}
-                    className="border border-gray-300 rounded px-3 py-2 text-sm w-full"
-                  />
-                </div>
-              ) : (
-                <div style={{ flex: 1 }}>
-                  <strong>{site.name}</strong> — {site.status}
-                </div>
-              )}
-
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                {editingId === site.id ? (
-                  <>
-                    <button
-                      onClick={async () => {
-                        await handleUpdate(site.id, {
-                          name: editName,
-                          status: editStatus,
-                        })
-                        setEditingId(null)
-                      }}
-                      className="text-xs px-2 py-1 border border-gray-300 rounded-md text-gray-500 hover:border-blue-500 hover:text-blue-600 transition"
-                    >
-                      Save
-                    </button>
-
-                    <button
-                      onClick={() => setEditingId(null)}
-                      className="text-xs px-2 py-1 border border-gray-300 rounded-md text-gray-500 hover:border-gray-400 transition"
-                    >
-                      Cancel
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setEditingId(site.id)
-                      setEditName(site.name)
-                      setEditStatus(site.status)
-                    }}
-                    className="text-xs px-2 py-1 border border-gray-300 rounded-md text-gray-500 hover:border-blue-500 hover:text-blue-600 transition"
-                  >
-                    Edit
-                  </button>
-                )}
-
-                <button
-                  onClick={() => handleDelete(site.id)}
-                  className="text-xs px-2 py-1 border border-gray-300 rounded-md text-gray-500 hover:border-red-500 hover:text-red-600 transition"
-                >
-                  Delete
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

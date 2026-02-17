@@ -1,4 +1,4 @@
-package io.enerlytics.api.site;
+package io.enerlytics.api.powerstation;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,8 +16,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "sites")
-public class Site {
+@Table(name = "power_stations")
+public class PowerStation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
